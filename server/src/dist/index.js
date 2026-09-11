@@ -207,7 +207,7 @@ io.on('connection', function (socket) {
         });
     }); });
 });
-Promise.all([database_config_1.initializeDatabase(), meetings_cache_1._load_connected_cache()])
+database_config_1.initializeDatabase()
     .then(function () {
     httpServer.listen(PORT, function () {
         console.log("Server listening on http://localhost:" + PORT);

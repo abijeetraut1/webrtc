@@ -9,6 +9,16 @@ interface JoinRequestData {
   meetingId: string;
 }
 
+export interface JoinAcceptanceRequestData {
+  status: string;
+  message: string;
+  data: {
+    socketId: string;
+    userId: string;
+    userName: string;
+  };
+}
+
 export function socketJoinRequest(data: JoinRequestData) {
   const response = socketInstance.emit('webrtc:join-request', data);
   console.log('socket response: ', response);
@@ -24,7 +34,7 @@ export function socketJoinResponse(onResponse: (data: unknown) => void) {
 }
 
 export function socketJoinAcceptanceRequest(
-  onAcceptance: (data: unknown) => void,
+  onAcceptance: (data: JoinAcceptanceRequestData) => void,
 ) {
   socketInstance.on('webrtc:join-acceptence-request', onAcceptance);
 

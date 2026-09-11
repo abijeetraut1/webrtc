@@ -1,11 +1,4 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-
 const connectedMeetings = new Map<string, connectedUsers>();
-const connectedMeetingsFile = path.resolve(
-  __dirname,
-  '../../data/connected-meetings.json',
-);
 
 interface connectedUsers {
   meetingId: string;
@@ -49,7 +42,6 @@ export async function _create_meeting_cache(
       creatorId: creatorId,
       connectedSockets: [],
     });
-    await _save_connected_cache();
 
     return true;
   } else {
@@ -65,7 +57,6 @@ export async function _create_meeting_cache(
           creatorId: creatorId,
           connectedSockets: [],
         });
-        await _save_connected_cache();
 
         return true;
       }
@@ -97,7 +88,6 @@ export async function _add_connected_cache(
     _find_existing_socket_storage.userName = data.userName;
   }
 
-  await _save_connected_cache();
   return _get_connected_meetings;
 }
 
@@ -118,7 +108,6 @@ export async function _remove_connected_cache(
 
   if (connectedSocket) {
     connectedSocket.socketId = '';
-    await _save_connected_cache();
   }
 
   return _get_connected_meetings;
@@ -141,7 +130,6 @@ export const _update_connected_device_cache = async (
 
   if (_find_existing_socket_storage) {
     _find_existing_socket_storage.isAccepted = data.isAccepted;
-    await _save_connected_cache();
   }
 
   return _get_connected_meetings;
@@ -163,31 +151,6 @@ export const _get_meeting_creator_socket = async (meetingId: string) => {
 
   return _creator_socket;
 };
-
-export async function _load_connected_cache() {
-  try {
-    const file = await fs.readFile(connectedMeetingsFile, 'utf8');
-    const savedMeetings = JSON.parse(file) as connectedUsers[];
-
-    connectedMeetings.clear();
-    for (const meeting of savedMeetings) {
-      connectedMeetings.set(meeting.meetingId, meeting);
-    }
-  } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      throw error;
-    }
-  }
-}
-
-async function _save_connected_cache() {
-  await fs.mkdir(path.dirname(connectedMeetingsFile), { recursive: true });
-  await fs.writeFile(
-    connectedMeetingsFile,
-    JSON.stringify([...connectedMeetings.values()], null, 2),
-    'utf8',
-  );
-}
 
 export const _get_meeting_creator_id = async (meetingId: string) => {
   const _get_connected_meetings = connectedMeetings.get(meetingId);

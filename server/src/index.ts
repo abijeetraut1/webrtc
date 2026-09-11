@@ -13,7 +13,6 @@ import {
   _get_meeting_creator_id,
   _update_connected_device_cache,
   _get_connected_device_data,
-  _load_connected_cache,
 } from './cache/meetings.cache';
 
 const app = express();
@@ -176,7 +175,7 @@ io.on('connection', (socket) => {
   });
 });
 
-Promise.all([initializeDatabase(), _load_connected_cache()])
+initializeDatabase()
   .then(() => {
     httpServer.listen(PORT, () => {
       console.log(`Server listening on http://localhost:${PORT}`);

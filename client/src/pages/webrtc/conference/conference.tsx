@@ -28,7 +28,7 @@ export default function Conference() {
         socketInstance.on("connect", handleConnect);
 
         if (id) {
-            socketJoinAcceptanceRequest((data) => {
+            const removeAcceptanceListener = socketJoinAcceptanceRequest((data) => {
                 console.log("JOIN ACCEPTANCE REQUEST: ", data)
                 toast("Join Request", {
                     description: `Join request from ${data.data.userName} (${data.data.userId})`,
@@ -38,12 +38,17 @@ export default function Conference() {
                     },
                 })
             });
+
+            return () => {
+                removeAcceptanceListener();
+                socketInstance.off("connect", handleConnect);
+            };
         }
 
         return () => {
             socketInstance.off("connect", handleConnect);
         };
-    }, []);
+    }, [id]);
 
     useEffect(() => {
         startCamera(
