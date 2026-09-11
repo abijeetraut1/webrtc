@@ -1,0 +1,1 @@
+This repo is the master repository that consists the every stuff related to video and media protocol transmissions in the peer to peer network and media protocol via http transmissions.
