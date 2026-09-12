@@ -17,6 +17,7 @@ import {
 
 const app = express();
 const PORT = 8080;
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:5173'];
 
 app.use(cookieParser());
 app.use(express.json());
@@ -42,19 +43,6 @@ const io = new Server(httpServer, {
     credentials: true,
   },
 });
-
-interface connectedUsers {
-  meetingId: String;
-  connectedSockets: [
-    {
-      socketId: String;
-      userId: String;
-      userName: String;
-      isCreator: String;
-    },
-  ];
-  connectedDevicesCount: Number;
-}
 
 io.use((socket, next) => {
   const req = {
@@ -151,7 +139,6 @@ io.on('connection', (socket) => {
         userId: data.userId,
         isAccepted: data.isAccepted,
       });
-      console.log('Accepted user data:', _accepted_user);
 
       socket
         .to(_accepted_user?.socketId)
@@ -161,6 +148,20 @@ io.on('connection', (socket) => {
         });
     } catch (error) {
       console.error('Error updating user acceptance status:', error);
+    }
+  });
+
+  socket.on('webrtc:join-answer', async (data) => {
+    try {
+      const meetingCreator = await _get_meeting_creator_socket(data.meetingId);
+
+      if (meetingCreator) {
+        socket.to(meetingCreator.socketId).emit('webrtc:join-answer', {
+          sdpAnswer: data.sdpAnswer,
+        });
+      }
+    } catch (error) {
+      console.error('Error forwarding join answer:', error);
     }
   });
 
@@ -177,7 +178,7 @@ io.on('connection', (socket) => {
 
 initializeDatabase()
   .then(() => {
-    httpServer.listen(PORT, () => {
+    httpServer.listen(PORT, '0.0.0.0', () => {
       console.log(`Server listening on http://localhost:${PORT}`);
     });
   })

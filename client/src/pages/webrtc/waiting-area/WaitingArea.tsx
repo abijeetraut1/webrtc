@@ -50,22 +50,7 @@ export default function WaitingArea() {
     });
   }, []);
 
-  function joinMeetingRequest() {
-    if (!id) {
-      navigate('/webrtc/join-conference', { replace: true });
-      return;
-    }
 
-    const joinMeetingRequestObject = {
-      meetingId: id,
-      userId: '1',
-      userName: 'User One',
-      isCreator: false,
-    };
-
-    console.log('Join Meeting Request');
-    socketJoinRequest(joinMeetingRequestObject);
-  }
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
       <div className="w-full max-w-sm md:max-w-4xl">

@@ -9,6 +9,11 @@ interface JoinRequestData {
   meetingId: string;
 }
 
+export interface JoinResponseData {
+  status: string;
+  message: string;
+}
+
 export interface JoinAcceptanceRequestData {
   status: string;
   message: string;
@@ -21,11 +26,10 @@ export interface JoinAcceptanceRequestData {
 
 export function socketJoinRequest(data: JoinRequestData) {
   const response = socketInstance.emit('webrtc:join-request', data);
-  console.log('socket response: ', response);
   return response;
 }
 
-export function socketJoinResponse(onResponse: (data: unknown) => void) {
+export function socketJoinResponse(onResponse: (data: JoinResponseData) => void) {
   socketInstance.on('webrtc:join-response', onResponse);
 
   return () => {
@@ -47,12 +51,19 @@ interface JoinAcceptanceResponseData {
   meetingId: string;
   isAccepted: boolean;
   userId: string;
+  sdpOffer: RTCSessionDescriptionInit | null;
 }
 
 export function socketJoinAcceptanceResponse(data: JoinAcceptanceResponseData) {
   const response = socketInstance.emit('webrtc:join-acceptence-response', data);
-  console.log('socket response: ', response);
   return response;
+}
+
+export function socketJoinAnswer(data: {
+  meetingId: string;
+  sdpAnswer: RTCSessionDescriptionInit;
+}) {
+  socketInstance.emit('webrtc:join-answer', data);
 }
 
 export default socketInstance;

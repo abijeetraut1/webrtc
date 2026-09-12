@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,6 +45,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
+};
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
 };
 exports.__esModule = true;
 exports._get_meeting_details = exports._create_meetings = exports._create_unique_uuid = void 0;
@@ -71,7 +93,9 @@ exports._create_meetings = function (req, res) { return __awaiter(void 0, void 0
             case 0:
                 user = res.locals.user;
                 if (!user) {
-                    return [2 /*return*/, res.status(400).json({ status: "UNAUTHENTICATED", message: "PLEASE LOGIN" })];
+                    return [2 /*return*/, res
+                            .status(400)
+                            .json({ status: 'UNAUTHENTICATED', message: 'PLEASE LOGIN' })];
                 }
                 return [4 /*yield*/, _create_unique_uuid(user.id)];
             case 1:
@@ -80,37 +104,56 @@ exports._create_meetings = function (req, res) { return __awaiter(void 0, void 0
                 return [4 /*yield*/, meeting_schema_1["default"].create({
                         userId: user.id,
                         meetingCode: _unique_code,
-                        meetingName: "helloworld"
+                        meetingName: 'helloworld'
                     })];
             case 2:
                 meetings = _a.sent();
-                meetings_cache_1._create_meeting_cache(meetings.getDataValue("meetingCode"), user.id, meetings.getDataValue("expiresAt"), meetings.getDataValue("autoExpires"));
-                return [2 /*return*/, res.status(201).json({ status: "SUCCESS", message: "MEETING CREATED", data: meetings })];
+                meetings_cache_1._create_meeting_cache(meetings.getDataValue('meetingCode'), user.id, meetings.getDataValue('expiresAt'), meetings.getDataValue('autoExpires'));
+                return [2 /*return*/, res
+                        .status(201)
+                        .json({ status: 'SUCCESS', message: 'MEETING CREATED', data: meetings })];
         }
     });
 }); };
 exports._get_meeting_details = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var user, id, meeting;
+    var user, id, meeting, meetingData, userId, meetingDetails, isAdmin;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 user = res.locals.user;
                 id = req.params.id;
                 if (!user) {
-                    return [2 /*return*/, res.status(400).json({ status: "UNAUTHENTICATED", message: "PLEASE LOGIN" })];
+                    return [2 /*return*/, res
+                            .status(400)
+                            .json({ status: 'UNAUTHENTICATED', message: 'PLEASE LOGIN' })];
                 }
                 return [4 /*yield*/, meeting_schema_1["default"].findOne({
                         where: {
                             meetingCode: id
                         },
-                        attributes: ["meetingCode", "meetingName", "isPrivate", "expiresAt"]
+                        attributes: [
+                            'userId',
+                            'meetingCode',
+                            'meetingName',
+                            'isPrivate',
+                            'expiresAt',
+                        ]
                     })];
             case 1:
                 meeting = _a.sent();
                 if (!meeting) {
-                    return [2 /*return*/, res.status(404).json({ status: "NOT_FOUND", message: "MEETING NOT FOUND" })];
+                    return [2 /*return*/, res
+                            .status(404)
+                            .json({ status: 'NOT_FOUND', message: 'MEETING NOT FOUND' })];
                 }
-                return [2 /*return*/, res.status(200).json({ status: "SUCCESS", message: "MEETING DETAILS", data: meeting })];
+                meetingData = meeting.get({ plain: true });
+                userId = meetingData.userId, meetingDetails = __rest(meetingData, ["userId"]);
+                isAdmin = String(userId) === String(user.id);
+                return [2 /*return*/, res.status(200).json({
+                        status: 'SUCCESS',
+                        message: 'MEETING DETAILS',
+                        data: __assign(__assign({}, meetingDetails), { isAdmin: isAdmin })
+                    })];
         }
     });
 }); };

@@ -47,6 +47,7 @@ var cors_1 = require("cors");
 var meetings_cache_1 = require("./cache/meetings.cache");
 var app = express_1["default"]();
 var PORT = 8080;
+var allowedOrigins = ['http://localhost:5173', 'http://localhost:5173'];
 app.use(cookie_parser_1["default"]());
 app.use(express_1["default"].json());
 app.use(cors_1["default"]({
@@ -173,7 +174,6 @@ io.on('connection', function (socket) {
                         })];
                 case 3:
                     _a.sent();
-                    console.log('Accepted user data:', _accepted_user);
                     socket
                         .to(_accepted_user === null || _accepted_user === void 0 ? void 0 : _accepted_user.socketId)
                         .emit('webrtc:join-acceptence-result', {
@@ -186,6 +186,29 @@ io.on('connection', function (socket) {
                     console.error('Error updating user acceptance status:', error_2);
                     return [3 /*break*/, 5];
                 case 5: return [2 /*return*/];
+            }
+        });
+    }); });
+    socket.on('webrtc:join-answer', function (data) { return __awaiter(void 0, void 0, void 0, function () {
+        var meetingCreator, error_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, meetings_cache_1._get_meeting_creator_socket(data.meetingId)];
+                case 1:
+                    meetingCreator = _a.sent();
+                    if (meetingCreator) {
+                        socket.to(meetingCreator.socketId).emit('webrtc:join-answer', {
+                            sdpAnswer: data.sdpAnswer
+                        });
+                    }
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_3 = _a.sent();
+                    console.error('Error forwarding join answer:', error_3);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     }); });
@@ -209,7 +232,7 @@ io.on('connection', function (socket) {
 });
 database_config_1.initializeDatabase()
     .then(function () {
-    httpServer.listen(PORT, function () {
+    httpServer.listen(PORT, '0.0.0.0', function () {
         console.log("Server listening on http://localhost:" + PORT);
     });
 })["catch"](function () {
